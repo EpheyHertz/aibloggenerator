@@ -1,0 +1,41 @@
+{% load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Details</title>
+    <link rel="stylesheet" href="{% static 'bloggenerator/blogdetails.css' %}">
+    <script src="{% static 'bloggenerator/blogdetails.js' %}" defer></script>
+</head>
+<body>
+    <header>
+        <h1>AI Blog Generator</h1>
+        <div class="header-buttons">
+            <p>Welcome {{ user.username|capfirst }}</p>
+            <button id="back" class="primary-btn"><a href="/blog-posts" style="text-decoration:none">Back to all Blogs</a></button>
+            <button id="logout" class="danger-btn"><a href="/logout/" style="text-decoration:none">Logout</a></button>
+        </div>
+    </header>
+
+    <main>
+        <section id="blog-details">
+            <h2 id="blog-title">{{ blog_article_detail.youtube_title }}</h2>
+            <p id="blog-date">Generated on:{{ blog_article_detail.created_at }}</p>
+            <p id="blog-source">Source YouTube Link: <a href="{{ blog_article_detail.youtube_link }}" id="source-link" target="_blank" style="text-decoration:none">{{ blog_article_detail.youtube_link }}</a> <!-- or --></p>
+            <hr>
+            <div id="blog-content">
+                <p>{{ blog_article_detail.generated_content }}</p>
+                <!-- More blog content goes here -->
+            </div>
+            <div class="action-buttons">
+                <button class="danger-btn delete-btn"><a href="/deleteblog/{{ blog_article_detail.id }}" style="text-decoration:none">Delete</a></button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 AI Blog Generator. All rights reserved.Buid By Ephey Hertz</p>
+    </footer>
+</body>
+</html>

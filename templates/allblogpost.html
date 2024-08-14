@@ -1,0 +1,52 @@
+{%load static %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Blog Generations</title>
+    <link rel="stylesheet" href="{% static 'bloggenerator/allblogpost.css' %}">
+    <script src="{% static 'bloggenerator/blogdetails.js' %}" defer></script>
+</head>
+<body>
+    <header>
+        <h1>AI Blog Generator</h1>
+        <div class="header-buttons">
+            <p>Welcome {{ user.username|capfirst }}</p>
+            <button class="danger-btn"><a href="/dashboard/">Go Back</a></button>
+            <button id="logout" class="danger-btn"><a href="/logout/">Logout</a></button>
+        </div>
+    </header>
+
+    <main>
+        <section id="generation-list">
+            <h2>All Your Blog Generations</h2>
+            <div class="generation-container">
+                <!-- Blog generation items will be dynamically added here -->
+                 {% for article in blog_articles reversed %}
+            <a href="/blog-details/{{article.id}}" style="text-decoration:none">
+                <div class="generation-item">
+                    <h3>{{ article.youtube_title }}</h3>
+                    <p>Generated on: {{ article.created_at }}</p>
+                    <p> {{ article.generated_content|truncatechars:30 }}</p>
+                    <div class="action-buttons">
+                        <button class="primary-btn view-btn">View</button>
+                        {% comment %} <button class="secondary-btn regenerate-btn">Regenerate</button>
+                        <button class="danger-btn delete-btn"><a href="/deleteblog/{{ article.id }}" style="text-decoration:none">Delete</a></button> {% endcomment %}
+                    </div>
+                </div>
+            </a>
+                {% endfor %}
+                
+                <!-- More items can be added here -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 AI Blog Generator. All rights reserved.Build By Ephey Hertz</p>
+    </footer>
+</body>
+</html>
