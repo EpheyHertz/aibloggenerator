@@ -12,8 +12,7 @@ from django.http import JsonResponse
 from pytube import YouTube
 from django.conf import settings
 import assemblyai as aai
-import openai
-import requests
+
 import google.generativeai as genai
 from .models import BlogPost
 from django.shortcuts import get_object_or_404
@@ -215,33 +214,7 @@ def generate_blog_from_transcription(transcription):
     except Exception as e:
         logging.error(f"Error in generate_blog_from_transcription function: {e}", exc_info=True)
         return None
-# def generate_blog_from_transcription(transcription):
-#     try:
-#         openai.api_key ='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' # Use Django settings for API key
-#         transcription_text = f"""
-#         Create a blog article from the provided transcript:
 
-#         {transcription}
-
-        
-#         """
- 
-
-#         response = openai.completions.create(
-#             model="gpt-3.5-turbo",  # Use a more cost-effective model
-#             prompt=transcription_text,  # Provide the prompt (your transcription text)
-#             max_tokens=50,  # Reduce max tokens to minimize usage
-#             n=1,  # Generate only one completion
-#             stop=None,  # Optional: You can define a stop sequence if applicable
-#             temperature=0.3 # Lower temperature for more predictable and concise output
-#         )
-
-#         generated_content = response.choices[0].text.strip()
-#         return generated_content
-
-#     except Exception as e:
-#         logging.error(f"Error in generate_blog_from_transcription function: {e}", exc_info=True)
-#         return None
 def blog_list(request):
     blog_articles = BlogPost.objects.filter(user=request.user)
     return render(request,'allblogpost.html',{'blog_articles':blog_articles})
