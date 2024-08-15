@@ -54,6 +54,7 @@ def generate_blog(request):
             new_blog_article = BlogPost.objects.create(
                 user=request.user,
                 youtube_title= title,
+                transcript=transcription,
                 youtube_link=youtube_link,
                 generated_content= blog_content,
             )
@@ -272,7 +273,14 @@ def user_signup(request):
                 error_message = 'Error occurred while registering the user. Please try again.'
                 return render(request, 'register.html', {'error_message': error_message})
 
+        else:
+            error_message = 'Passwords do not match.'
+            logging.warning(f"Password mismatch for email: {email}")
+            return render(request, 'register.html', {'error_message': error_message})
 
+    else:
+        # Handle GET request by rendering the signup form
+        return render(request, 'register.html')
 @login_required
 def user_logout(request):
     logout(request)

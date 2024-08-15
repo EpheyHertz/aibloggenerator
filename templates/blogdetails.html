@@ -21,7 +21,9 @@
     <main>
         <section id="blog-details">
             <h2 id="blog-title">{{ blog_article_detail.youtube_title }}</h2>
+            <hr>
             <p id="blog-date">Generated on:{{ blog_article_detail.created_at }}</p>
+            <p id="blog-date"><h5>The Transcript Used: </h5>{{ blog_article_detail.transcript }}</p>
             <p id="blog-source">Source YouTube Link: <a href="{{ blog_article_detail.youtube_link }}" id="source-link" target="_blank" style="text-decoration:none">{{ blog_article_detail.youtube_link }}</a> <!-- or --></p>
             <hr>
             <div id="blog-content">
@@ -29,7 +31,9 @@
                 <!-- More blog content goes here -->
             </div>
             <div class="action-buttons">
-                <button class="danger-btn delete-btn"><a href="/deleteblog/{{ blog_article_detail.id }}" style="text-decoration:none">Delete</a></button>
+                <form method="POST" action="{% url 'delete_blog' blog_id=blog_article_detail.id %}">
+                    <button class="danger-btn" type="submit" style="text-decoration:none">Delete</button>
+                </form>
             </div>
         </section>
     </main>
