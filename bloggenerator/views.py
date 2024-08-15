@@ -1,4 +1,4 @@
-
+import filetype
 import logging
 import os
 import json
@@ -12,6 +12,7 @@ from django.http import JsonResponse
 from pytube import YouTube
 from django.conf import settings
 import assemblyai as aai
+from moviepy.editor import VideoFileClip
 
 import google.generativeai as genai
 from .models import BlogPost
@@ -72,66 +73,79 @@ def dashboard(request):
 #     else:
 #         return JsonResponse({'error': 'Invalid request method'}, status=405)
 @csrf_exempt
+def is_video_file(file):
+    try:
+        kind = filetype.guess(file.read())
+        file.seek(0)  # Reset file pointer to the start
+        return kind and kind.mime.startswith('video/')
+    except Exception as e:
+        logging.error(f"Error determining file type: {e}", exc_info=True)
+        return False
+@login_required
+@csrf_exempt
 def generate_blog(request):
     if request.method == 'POST':
         try:
             youtube_link = request.POST.get('youtube_link')
             file = request.FILES.get('file')
 
-            # Ensure that at least one input is provided
-            if not youtube_link and not file:
-                return JsonResponse({'error': 'You must provide either a YouTube link or upload a file'}, status=400)
-
             if youtube_link:
-                # Handle YouTube link processing
+                # Handle YouTube link
                 title = yt_title(youtube_link)
 
                 # Get the transcription from the YouTube video
                 transcription = get_transcription(youtube_link)
                 if not transcription:
-                    return JsonResponse({'error': 'Failed to get transcription from the YouTube video'}, status=500)
+                    return JsonResponse({'error': 'Failed to get transcription'}, status=500)
 
                 # Generate the blog content
                 blog_content = generate_blog_from_transcription(transcription)
                 if not blog_content:
-                    return JsonResponse({'error': 'Failed to generate blog content'}, status=500)
+                    return JsonResponse({'error': 'Failed to generate blog article'}, status=500)
 
-                # Save the blog article with the YouTube link in the file_path field
+                # Save the blog article
                 new_blog_article = BlogPost.objects.create(
                     user=request.user,
-                    youtube_title = title,
-                    youtube_link=youtube_link,  # Store the YouTube link in the file_path field
+                    youtube_title=title,
+                    youtube_link=youtube_link,
                     transcript=transcription,
                     generated_content=blog_content
                 )
                 new_blog_article.save()
 
             elif file:
-                # Handle file upload processing
+                # Handle file upload (audio/video)
                 title = file.name
-
-                # Save the uploaded file and get its path
                 file_path = save_file(file)  # Custom function to save the file and return the path
 
-                # Get the transcription from the uploaded file
-                transcription = get_transcription_from_file(file_path)
+                # Check if the file is a video
+                if is_video_file(file):
+                    audio_file_path = extract_audio_from_video(file_path)  # Custom function to extract audio
+                else:
+                    audio_file_path = file_path
+
+                # Get the transcription from the file
+                transcription = get_transcription_from_file(audio_file_path)
                 if not transcription:
-                    return JsonResponse({'error': 'Failed to get transcription from the uploaded file'}, status=500)
+                    return JsonResponse({'error': 'Failed to get transcription'}, status=500)
 
                 # Generate the blog content
                 blog_content = generate_blog_from_transcription(transcription)
                 if not blog_content:
-                    return JsonResponse({'error': 'Failed to generate blog content'}, status=500)
+                    return JsonResponse({'error': 'Failed to generate blog article'}, status=500)
 
-                # Save the blog article with the file path in the file_path field
+                # Save the blog article
                 new_blog_article = BlogPost.objects.create(
                     user=request.user,
                     youtube_title=title,
-                    youtube_link=file_path,  # Store the file path in the file_path field
+                    youtube_link=file_path,  # Store the file path in youtube_link
                     transcript=transcription,
                     generated_content=blog_content
                 )
                 new_blog_article.save()
+
+            else:
+                return JsonResponse({'error': 'You must provide either a YouTube link or upload a file'}, status=400)
 
             # Return the generated blog content as a response
             return JsonResponse({"content": blog_content})
@@ -140,10 +154,25 @@ def generate_blog(request):
             logging.error(f"Error processing POST data: {e}")
             return JsonResponse({'error': 'Invalid data sent'}, status=400)
         except Exception as e:
-            logging.error(f"Unexpected error: {e}")
+            logging.error(f"Unexpected error: {e}", exc_info=True)
             return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+def extract_audio_from_video(video_path):
+    try:
+        # Load the video file
+        video = VideoFileClip(video_path)
+
+        # Extract the audio
+        audio_path = video_path.rsplit('.', 1)[0] + '.mp3'
+        video.audio.write_audiofile(audio_path)
+
+        return audio_path
+
+    except Exception as e:
+        logging.error(f"Error extracting audio from video: {e}", exc_info=True)
+        return None
 
 def yt_title(link):
     try:
@@ -225,7 +254,7 @@ def get_transcription(link):
         if not audio_file:
             return None
 
-        aai.settings.api_key = '22317c2fc4ab4cfd96f5a18a1c667418' # Use Django settings for API key
+        aai.settings.api_key =  settings.AAI_API_KEY # Use Django settings for API key
         transcriber = aai.Transcriber()
         transcript = transcriber.transcribe(audio_file)
         return transcript.text
@@ -242,7 +271,7 @@ def get_transcription_from_file(file_path):
             return None
 
         # Set up the API key for transcription service
-        aai.settings.api_key = '22317c2fc4ab4cfd96f5a18a1c667418'  # Use Django settings for API key
+        aai.settings.api_key =settings.AAI_API_KEY    # Use Django settings for API key
 
         # Create the transcriber object
         transcriber = aai.Transcriber()
@@ -260,7 +289,7 @@ def get_transcription_from_file(file_path):
 def generate_blog_from_transcription(transcription):
     try:
         # Define your Google Gemini API key here
-        gemini_api_key = 'AIzaSyBPepAXsyXoRZHPixasP3RA0XiU_6O3_q4'
+        gemini_api_key = settings.GEMINI_API_KEY 
         genai.configure(api_key=gemini_api_key)
 
         # Structure the transcription into a prompt
@@ -317,11 +346,11 @@ def generate_blog_from_transcription(transcription):
     except Exception as e:
         logging.error(f"Error in generate_blog_from_transcription function: {e}", exc_info=True)
         return None
-
+@login_required
 def blog_list(request):
     blog_articles = BlogPost.objects.filter(user=request.user)
     return render(request,'allblogpost.html',{'blog_articles':blog_articles})
-
+@login_required
 def blog_details(request,pk):
     blog_article_detail = BlogPost.objects.get(id=pk)
     if request.user == blog_article_detail.user:
@@ -387,13 +416,16 @@ def user_signup(request):
 def user_logout(request):
     logout(request)
     return redirect('/login/')
-
+@login_required
+@csrf_exempt
 def delete_blog(request, blog_id):
     if request.method == 'POST':
         try:
             blog = get_object_or_404(BlogPost, id=blog_id)
             blog.delete()
-            return JsonResponse({"success": True, "message": "Blog deleted successfully"})
+            return redirect('/blog-posts/')
+            # return JsonResponse({"success": True, "message": "Blog deleted successfully"})
         except Exception as e:
             return JsonResponse({"success": False, "message": str(e)})
-    return JsonResponse({"success": False, "message": "Invalid request method"})
+    # return JsonResponse({"success": False, "message": "Invalid request method"})
+    return redirect('/blog-posts/')

@@ -32,6 +32,7 @@
             </div>
             <div class="action-buttons">
                 <form method="POST" action="{% url 'delete_blog' blog_id=blog_article_detail.id %}">
+                    {% csrf_token %}
                     <button class="danger-btn" type="submit" style="text-decoration:none">Delete</button>
                 </form>
             </div>

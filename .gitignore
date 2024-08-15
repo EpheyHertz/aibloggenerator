@@ -1,0 +1,12 @@
+# Ignore environment variable file
+.env
+
+# Ignore compiled files
+*.pyc
+__pycache__/
+
+# Ignore Django migrations
+*/migrations/
+
+# Ignore database files
+db.sqlite3

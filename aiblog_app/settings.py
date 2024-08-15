@@ -91,6 +91,9 @@ DATABASES = {
         'PASSWORD':'83fe51ce35907dfbaba34e1ef02497658686a2ab',
         'HOST':'jux.h.filess.io',
         'PORT':'3307',
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+        },
     }
 }
 
@@ -128,7 +131,9 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
-
+from decouple import config
+GEMINI_API_KEY = config('GEMINI_API_KEY')
+AAI_API_KEY = config('AAI_API_KEY')
 
 STATIC_URL = '/static/'
 
