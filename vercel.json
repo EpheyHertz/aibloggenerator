@@ -1,6 +1,6 @@
 {
     "builds": [{
-        "src": "aiblog_app/wsgi.py",   
+        "src": "aiblog_app/wsgi.py",
         "use": "@vercel/python",
         "config": {
             "maxLambdaSize": "15mb",
@@ -9,7 +9,7 @@
     }],
     "routes": [
         {
-            "src": "/(*)",
+            "src": "/(.*)",  
             "dest": "aiblog_app/wsgi.py"
         }
     ]
