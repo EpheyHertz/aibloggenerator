@@ -82,7 +82,8 @@ WSGI_APPLICATION = 'aiblog_app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 # postgresql://aibloggenerator_soundgift:5b64fdb33abb515dd0823c0456189aad5aff5733@kdj.h.filess.io:5433/aibloggenerator_soundgift
-
+import pymysql
+pymysql.install_as_MySQLdb()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -93,7 +94,6 @@ DATABASES = {
         'PORT':'3307',
         'OPTIONS': {
             'charset': 'utf8mb4',
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
     }
 }
