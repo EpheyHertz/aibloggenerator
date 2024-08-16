@@ -1,14 +1,16 @@
 {
-    "builds":[{
-        "scr":"aiblog_app/wsgi.py",
-        "use":"@vercel/python",
-        "config":{"maxLambdaSize":"15mb",
-    "runtime":"python3.12"}
+    "builds": [{
+        "src": "aiblog_app/wsgi.py",   
+        "use": "@vercel/python",
+        "config": {
+            "maxLambdaSize": "15mb",
+            "runtime": "python3.12"
+        }
     }],
-    "routes":[
+    "routes": [
         {
-            "src":"/(*)",
-            "dest":"aiblog_app/wsgi.py"
+            "src": "/(*)",
+            "dest": "aiblog_app/wsgi.py"
         }
     ]
 }
