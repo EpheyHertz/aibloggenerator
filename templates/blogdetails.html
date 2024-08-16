@@ -24,8 +24,18 @@
             <hr>
             <p id="blog-date">Generated on:{{ blog_article_detail.created_at }}</p>
             <p id="blog-date"><h5>The Transcript Used: </h5>{{ blog_article_detail.transcript }}</p>
-            <p id="blog-source">Source YouTube Link: <a href="{{ blog_article_detail.youtube_link }}" id="source-link" target="_blank" style="text-decoration:none">{{ blog_article_detail.youtube_link }}</a> <!-- or --></p>
+            <p id="blog-source">
+                {% if blog_article_detail.youtube_link|slice:":4" == "http" %}
+                    Source YouTube Link: 
+                    <a href="{{ blog_article_detail.youtube_link }}" id="source-link" target="_blank" style="text-decoration:none">
+                        {{ blog_article_detail.youtube_link }}
+                    </a>
+                {% else %}
+                    Source: {{ blog_article_detail.youtube_link }}
+                {% endif %}
+            </p>
             <hr>
+            
             <div id="blog-content">
                 <p>{{ blog_article_detail.generated_content }}</p>
                 <!-- More blog content goes here -->

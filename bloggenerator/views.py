@@ -29,49 +29,8 @@ def home(request):
 def dashboard(request):
     return render(request, 'home.html')
 
-# @csrf_exempt
-# def generate_blog(request):
-#     if request.method == 'POST':
-#         try:
-#             youtube_link = request.POST.get('youtube_link')
-#             file = request.FILES.get('file')
 
-#             if not youtube_link:
-#                 return JsonResponse({'error': 'YouTube link is required'}, status=400)
 
-#             # Get the YouTube video title
-#             title = yt_title(youtube_link)
-
-#             # Get the transcript
-#             transcription = get_transcription(youtube_link)
-#             if not transcription:
-#                 return JsonResponse({'error': 'Failed to get transcription'}, status=500)
-
-#             # Generate the blog content
-#             blog_content = generate_blog_from_transcription(transcription)
-#             if not blog_content:
-#                 return JsonResponse({'error': 'Failed to generate blog article'}, status=500)
-            
-#             new_blog_article = BlogPost.objects.create(
-#                 user=request.user,
-#                 youtube_title= title,
-#                 transcript=transcription,
-#                 youtube_link=youtube_link,
-#                 generated_content= blog_content,
-#             )
-#             new_blog_article.save()
-
-#             # Return blog article as response
-#             return JsonResponse({"content": blog_content})
-
-#         except (KeyError, json.JSONDecodeError) as e:
-#             logging.error(f"Error processing POST data: {e}")
-#             return JsonResponse({'error': 'Invalid data sent'}, status=400)
-#         except Exception as e:
-#             logging.error(f"Unexpected error: {e}")
-#             return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
-#     else:
-#         return JsonResponse({'error': 'Invalid request method'}, status=405)
 @csrf_exempt
 def is_video_file(file):
     try:
@@ -211,34 +170,7 @@ def download_audio(link):
     except Exception as e:
         logging.error(f"Error in download_audio function: {e}", exc_info=True)
         return None
-# def download_audio(link):
-#     try:
-#         yt = YouTube(link)
-#         logging.info(f"Successfully created YouTube object for link: {link}")
 
-#         # Filter audio streams and select the first one
-#         video = yt.streams.filter(only_audio=True).first()
-#         if not video:
-#             logging.error("No audio stream found for the video.")
-#             return None
-
-#         logging.info("Audio stream found, starting download.")
-        
-#         # Download the audio file
-#         out_file = video.download(output_path=settings.MEDIA_ROOT)
-#         logging.info(f"Audio downloaded successfully: {out_file}")
-
-#         # Rename the downloaded file
-#         base, ext = os.path.splitext(out_file)
-#         new_file = base + '.mp3'
-#         os.rename(out_file, new_file)
-#         logging.info(f"File renamed successfully: {new_file}")
-
-#         return new_file
-
-#     except Exception as e:
-#         logging.error(f"Error in download_audio function: {e}", exc_info=True)
-#         return None
 
 def save_file(file):
     file_name = file.name
