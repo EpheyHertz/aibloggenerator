@@ -2,6 +2,11 @@
     "builds": [{
         "src": "aiblog_app/wsgi.py",
         "use": "@vercel/python",
+        "env": {
+            "PYTHON_VERSION": "3.12",
+            "CFLAGS": "-I/usr/include/mysql",
+            "LDFLAGS": "-L/usr/lib/mysql -lmysqlclient"
+        },
         "config": {
             "maxLambdaSize": "50mb",
             "runtime": "python3.12"
@@ -9,7 +14,7 @@
     }],
     "routes": [
         {
-            "src": "/(.*)",  
+            "src": "/(.*)",
             "dest": "aiblog_app/wsgi.py"
         }
     ]
